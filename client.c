@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 	}
 	
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons((int)argv[2]);
+	server_addr.sin_port = htons(atoi(argv[2]));
 	server_addr.sin_addr = *((struct in_addr *)he->h_addr);
 	bzero(&(server_addr.sin_zero), 8);
 	
@@ -70,16 +70,11 @@ int main(int argc, char *argv[])
 			{
 				sBuffer[0] = 0; sBuffer[1] = 1;  //Read Request (RRQ)
 				
-				for(j = 0,i = 2; j < strlen(filename); j++, i++)
-				{
-					sBuffer[i] = filename[j];
-				}
+				strncpy(*(&sBuffer+2), filename, strlen(filename));
+				sBuffer[strlen(filename)+1] = 0;
+				strncpy(*(&sBuffer+strlen(filename)+2), "octet", 5);
+				sBuffer[strlen(filename)+8] = 0;
 				
-				sBuffer[i] = 0;
-				sBuffer[i+1] = 'R';
-				sBuffer[i+2] = 0;
-				
-				printf("%d", sizeof(sBuffer));
 				iNumBytes = sendto(iSock, sBuffer, strlen(sBuffer), 0, (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
 				
 				if(iNumBytes < 0)
