@@ -12,7 +12,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 
-#define BUFFER 512
+#define BUFFER 576
 
 int main(int argc, char *argv[])
 {
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 				strncpy(*(&sBuffer+strlen(filename)+2), "octet", 5);
 				sBuffer[strlen(filename)+8] = 0;
 				
-				iNumBytes = sendto(iSock, sBuffer, strlen(sBuffer), 0, (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
+				iNumBytes = sendto(iSock, sBuffer, BUFFER, 0, (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
 				
 				if(iNumBytes < 0)
 				{

@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 
-#define BUFFER 1024
+#define BUFFER 576
 #define SERVERPORT 2424
 
 int main(void)
@@ -34,7 +34,6 @@ int main(void)
 	my_addr.sin_port = htons(SERVERPORT);
 	my_addr.sin_addr.s_addr = INADDR_ANY;
 	bzero(&(my_addr.sin_zero), 8);
-	listen(iFileDescriptor, 1);
 	
 	if(bind(iSock, (struct sockaddr *)&my_addr, sizeof(struct sockaddr)) < 0)
 	{
