@@ -12,7 +12,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 
-#define BUFFER 1024
+#define BUFFER 512
 
 int main(int argc, char *argv[])
 {
@@ -20,28 +20,19 @@ int main(int argc, char *argv[])
 	int iSock, iFileDescriptor, iNumBytes;
 	struct sockaddr_in server_addr;
 	struct hostent *he;
+	int i , j;
 	
-	char sBuffer[BUFFER], cmd[12];
-
+	char sBuffer[BUFFER], input[512], *cmd, *token, *filename;
 	
-	while(strcmp(cmd, "exit") != 0)
+	if(argc < 3)
 	{
-		gets(cmd);
-		
-		if(strcmp(cmd, "get") == 0)
-		{
-		
-		}
-	}
-	
-	/*if(argc < 3)
-	{
-		printf("TFTP Client\n");
+		printf("Uso: client <endereço> <porta>\n");
 		exit(1);
 	}
 	
+	
 	//convertendo o endereco passado para uma estrutura que eu entendo
-	if((he=gethostbyname(argv[1])) == NULL)
+	if((he = gethostbyname(argv[1])) == NULL)
 	{
 		perror("gethostbyname");
 		exit(1);
@@ -53,22 +44,94 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	
-	//abrir o arquivo passado
-	iFileDescriptor = open(argv[2], O_RDONLY);
-	if(iFileDescriptor < 0)
-	{
-		perror("open");
-		exit(1);
-	}
-	
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(2424);
-	
+	server_addr.sin_port = htons((int)argv[2]);
 	server_addr.sin_addr = *((struct in_addr *)he->h_addr);
 	bzero(&(server_addr.sin_zero), 8);
 	
+	
+	printf("----------------------------TFTP - Trivial File Transfer Protocol------------------------------------");
+	printf("\nComandos:\n\tget <arquivo>\n\tput <arquivo>\n\trexmt <tempo>\n\ttimeout <tempo>\n\ttrace\n\tquit\n");
+	
+	cmd = malloc(5);
+	filename = malloc(255);
+	
+	while(strcmp(cmd, "quit") != 0 && strcmp(cmd, "q") != 0)
+	{
+		printf(">");
+		gets(input);
+		cmd = strtok (input, " ");
+		
+		if(strcmp(cmd, "get") == 0 || strcmp(cmd, "g") == 0 )
+		{
+			puts("Buscando arquivo remoto...");
+			
+			if((filename = strtok(NULL, " ")) != NULL)
+			{
+				sBuffer[0] = 0; sBuffer[1] = 1;  //Read Request (RRQ)
+				
+				for(j = 0,i = 2; j < strlen(filename); j++, i++)
+				{
+					sBuffer[i] = filename[j];
+				}
+				
+				sBuffer[i] = 0;
+				sBuffer[i+1] = 'R';
+				sBuffer[i+2] = 0;
+				
+				printf("%d", sizeof(sBuffer));
+				iNumBytes = sendto(iSock, sBuffer, strlen(sBuffer), 0, (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
+				
+				if(iNumBytes < 0)
+				{
+					perror("sendto");
+				}
+				else
+				{
+					//recebe o ACK e enviar proximo pacote
+				}
+					
+				
+			}			
+			
+		}
+		else if(strcmp(cmd, "put") == 0 || strcmp(cmd, "p") == 0 )
+		{
+			//abrir o arquivo passado
+			/*iFileDescriptor = open(argv[2], O_RDONLY);
+			if(iFileDescriptor < 0)
+			{
+				perror("open");
+				exit(1);
+			}*/	
+		}
+		else if(strcmp(cmd, "rexmt") == 0 || strcmp(cmd, "r") == 0 )
+		{
+		
+		}
+		else if(strcmp(cmd, "timeout") == 0 || strcmp(cmd, "t") == 0 )
+		{
+		
+		}
+		else if(strcmp(cmd, "trace") == 0 || strcmp(cmd, "c") == 0 )
+		{
+		
+		}
+		else if(strcmp(cmd, "quit") == 0 || strcmp(cmd, "q") == 0 )
+		{
+			puts("\nbye");
+		}
+		else
+		{
+			printf("\n\'%s\': comando inválido. Use get, put, rexmt, timeout, trace ou quit\n", cmd);
+		}
+	}
+	
+	
+	
+	
 	//inicio do envio
-	iNumBytes = sendto(iSock, "01INICIO", 8, 0, (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
+	/*iNumBytes = sendto(iSock, "01INICIO", 8, 0, (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
 	if(iNumBytes < 0)
 	{
 		perror("sendto");
@@ -109,10 +172,10 @@ int main(int argc, char *argv[])
 	{
 		perror("sendto");
 		exit(1);
-	}
+	}*/
 
 	close(iSock);
-	close(iFileDescriptor);*/
+	close(iFileDescriptor);
 	return 0;
 
 }

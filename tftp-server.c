@@ -11,7 +11,8 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 
-#define BUFFER 1024
+#define BUFFER 512
+#define SERVERPORT 2424
 
 int main(void)
 {
@@ -30,7 +31,7 @@ int main(void)
 	}
 	
 	my_addr.sin_family = AF_INET;
-	my_addr.sin_port = htons(2424);
+	my_addr.sin_port = htons(SERVERPORT);
 	my_addr.sin_addr.s_addr = INADDR_ANY;
 	bzero(&(my_addr.sin_zero), 8);
 	
@@ -43,6 +44,7 @@ int main(void)
 	//loop infinito recebendo dados
 	while(1)
 	{
+		puts(".");
 		addr_len = sizeof(struct sockaddr);
 		if((iNumBytes = recvfrom(iSock, sBuffer, BUFFER, 0, (struct sockaddr *)&client_addr, &addr_len)) < 0)
 		{
