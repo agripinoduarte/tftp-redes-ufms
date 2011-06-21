@@ -23,20 +23,30 @@ void rrq(char *buffer)
 {
 	char filename[255];
 	strcpy(filename, &buffer[2]);
-	
-		    
+	char fBuffer[512];
+	int iNumBytes;   
 	puts(filename);
 	
-	FILE *arqFonte;
-	arqFonte = fopen(filename, "r");
+	FILE *pFile;
+	pFile = fopen(filename, "r");
+	int size;
 	
-	if (arqFonte != 0)
+	if (pFile != 0)
 	{
-		puts("Encontrado");
+		//fragmentar o arquivo em blocos de 512 bytes e envia-los sequencialmente para o cliente
+		while(size = fread(fBuffer, 1, 512, pFile) > 0)
+		{
+			
+			if(iNumBytes = sendto(iSock, fBuffer, BUFFER, 0, (struct sockaddr *)&my_addr, sizeof(struct sockaddr)))
+			{
+			
+			}
+		
+		}
 	}
 	else
 	{
-		puts("Nao encontrado");
+		//retornar pacote de erro
 	}	
 	
 
@@ -46,7 +56,7 @@ int main(void)
 {
 	int iNumBytes;
 	char sBuffer[BUFFER], cmd[4];
-	
+	int new_fd;
 	if((iSock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
 	{
 		perror("socket");
@@ -76,6 +86,7 @@ int main(void)
 			exit(1);
 		}
 		
+		new_fd = accept(iFileDescriptor, (struct sockaddr *)&client_addr, &addr_len);
 		puts("pedido recebido");
 		
 		switch(sBuffer[1])
@@ -91,7 +102,7 @@ int main(void)
 		}
 
 		
-		if(strcmp(sBuffer, "01INICIO") == 0)
+		/*if(strcmp(sBuffer, "01INICIO") == 0)
 		{
 			if((iNumBytes = recvfrom(iSock, sBuffer, BUFFER, 0, (struct sockaddr *)&client_addr, &addr_len)) < 0)
 			{
@@ -133,7 +144,7 @@ int main(void)
 			
 			close(iFileDescriptor);
 			fprintf(stderr, "\nFim de transferencia");
-		}
+		}*/
 			
 	}	
 	
