@@ -20,9 +20,9 @@ int main(int argc, char *argv[])
 	int iSock, iFileDescriptor, iNumBytes;
 	struct sockaddr_in server_addr;
 	struct hostent *he;
-	int i , j;
+	int i , j, k;
 	
-	char sBuffer[BUFFER], input[512], *cmd, *token, *filename;
+	char sBuffer[BUFFER], input[512], *cmd, *token, *filename, oct[6];
 	
 	if(argc < 3)
 	{
@@ -69,11 +69,17 @@ int main(int argc, char *argv[])
 			if((filename = strtok(NULL, " ")) != NULL)
 			{
 				sBuffer[0] = 0; sBuffer[1] = 1;  //Read Request (RRQ)
+				puts(filename);
 				
-				strncpy(*(&sBuffer+2), filename, strlen(filename));
-				sBuffer[strlen(filename)+1] = 0;
-				strncpy(*(&sBuffer+strlen(filename)+2), "octet", 5);
-				sBuffer[strlen(filename)+8] = 0;
+				for(j = 0, i = 2; j < strlen(filename); j++, i++)
+				{
+					sBuffer[i] = filename[j];
+				}
+				
+				sBuffer[i+1] = 0;
+				sBuffer[i+2] = 'o'; sBuffer[i+3] = 'c'; sBuffer[i+4] = 't'; sBuffer[i+5] = 'e'; sBuffer[i+6] = 't';
+				sBuffer[i+7] = 0;
+				
 				
 				iNumBytes = sendto(iSock, sBuffer, BUFFER, 0, (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
 				
@@ -83,7 +89,7 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					//recebe o ACK e enviar proximo pacote
+					//recebe o primeiro pacote e envia o ACK
 				}
 					
 				
@@ -92,13 +98,7 @@ int main(int argc, char *argv[])
 		}
 		else if(strcmp(cmd, "put") == 0 || strcmp(cmd, "p") == 0 )
 		{
-			//abrir o arquivo passado
-			/*iFileDescriptor = open(argv[2], O_RDONLY);
-			if(iFileDescriptor < 0)
-			{
-				perror("open");
-				exit(1);
-			}*/	
+		
 		}
 		else if(strcmp(cmd, "rexmt") == 0 || strcmp(cmd, "r") == 0 )
 		{

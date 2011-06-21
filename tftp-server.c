@@ -14,15 +14,38 @@
 #define BUFFER 576
 #define SERVERPORT 2424
 
+int iSock, iFileDescriptor;
+struct sockaddr_in my_addr;
+struct sockaddr_in client_addr;
+socklen_t addr_len;
+	
+void rrq(char *buffer)
+{
+	char filename[255];
+	strcpy(filename, &buffer[2]);
+	
+		    
+	puts(filename);
+	
+	FILE *arqFonte;
+	arqFonte = fopen(filename, "r");
+	
+	if (arqFonte != 0)
+	{
+		puts("Encontrado");
+	}
+	else
+	{
+		puts("Nao encontrado");
+	}	
+	
+
+}
+
 int main(void)
 {
-
-	int iSock, iFileDescriptor;
-	struct sockaddr_in my_addr;
-	struct sockaddr_in client_addr;
-	socklen_t addr_len;
 	int iNumBytes;
-	char sBuffer[BUFFER];
+	char sBuffer[BUFFER], cmd[4];
 	
 	if((iSock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
 	{
@@ -44,17 +67,29 @@ int main(void)
 	//loop infinito recebendo dados
 	while(1)
 	{
-		puts(".");
+		puts("Esperando conexão...");
 		addr_len = sizeof(struct sockaddr);
+		
 		if((iNumBytes = recvfrom(iSock, sBuffer, BUFFER, 0, (struct sockaddr *)&client_addr, &addr_len)) < 0)
 		{
 			perror("recvfroM");
 			exit(1);
 		}
 		
-		fprintf(stderr, "Recebendo pacotes de %s\n", inet_ntoa(client_addr.sin_addr));
-		fprintf(stderr, "o pacote tem %d bytes\n", iNumBytes);
-		sBuffer[iNumBytes] = '\0';
+		puts("pedido recebido");
+		
+		switch(sBuffer[1])
+		{
+			case 1: //RRQ - Read Request
+				rrq(sBuffer);
+			break;
+			
+			case 2: //WRQ - Write Request
+			
+			break;
+		
+		}
+
 		
 		if(strcmp(sBuffer, "01INICIO") == 0)
 		{
@@ -106,3 +141,4 @@ int main(void)
 	
 	return 0;
 }
+
